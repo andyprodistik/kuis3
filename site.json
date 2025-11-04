@@ -97,7 +97,17 @@
         "published": true,
         "hideInMenu": false,
         "locked": false,
-        "readtime": 1
+        "readtime": 1,
+        "files": [
+          {
+            "path": "C:\\Users\\Administrator\\Downloads\\git\\andyprodistik\\kuis\\files\\etika.jpg",
+            "fullUrl": "/C:\\Users\\Administrator\\Downloads\\git\\andyprodistik\\kuis/files/etika.jpg",
+            "url": "files/etika.jpg",
+            "type": "image/jpeg",
+            "name": "etika.jpg",
+            "size": 8645
+          }
+        ]
       }
     }
   ]
