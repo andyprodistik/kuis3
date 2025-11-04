@@ -109,6 +109,22 @@
           }
         ]
       }
+    },
+    {
+      "id": "item-70f63147-d357-4aeb-8552-41aafdca6f6e",
+      "indent": 0,
+      "location": "pages/item-70f63147-d357-4aeb-8552-41aafdca6f6e/index.html",
+      "slug": "page-2",
+      "order": 3,
+      "parent": null,
+      "title": "Page",
+      "description": "",
+      "metadata": {
+        "created": 1762215336,
+        "updated": 1762215336,
+        "images": [],
+        "videos": []
+      }
     }
   ]
 }
