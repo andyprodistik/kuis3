@@ -212,7 +212,13 @@ class ConfettiQuiz extends LitElement {
     `;
 
     launchConfetti() {
-        // Fungsi global confetti() dimuat dari index.html
+        // Gunakan overlay DDD jika tersedia
+        const overlay = document.querySelector('kuis-confeti');
+        if (overlay && typeof overlay.fire === 'function') {
+            overlay.fire({ duration: 2000, particleCount: 220 });
+            return;
+        }
+        // Fallback ke window.confetti jika ada
         if (window.confetti) {
             window.confetti({
                 particleCount: 200,

@@ -15,7 +15,7 @@
         "canonical": true
       },
       "created": 1762212603,
-      "updated": 1762219978,
+      "updated": 1762215380,
       "git": {
         "vendor": "github",
         "branch": "gh-pages"
@@ -121,7 +121,7 @@
       "description": "\nDeep thoughts..\nDeep thoughts..\nDeep thoughts..\nDeep thoughts..\n\n\n\n",
       "metadata": {
         "created": 1762215336,
-        "updated": 1762219493,
+        "updated": 1762215380,
         "images": {},
         "videos": {},
         "published": true,
@@ -131,43 +131,19 @@
       }
     },
     {
-      "id": "item-087e156b-c886-4447-91aa-ccfa022bd771",
+      "id": "item-440f39db-892e-4da1-b37c-525f448ec250",
       "indent": 0,
-      "location": "pages/item-087e156b-c886-4447-91aa-ccfa022bd771/index.html",
+      "location": "pages/item-440f39db-892e-4da1-b37c-525f448ec250/index.html",
       "slug": "page-3",
       "order": 4,
       "parent": null,
       "title": "Page",
-      "description": "\n\n",
+      "description": "",
       "metadata": {
-        "created": 1762219510,
-        "updated": 1762219540,
-        "images": {},
-        "videos": {},
-        "published": true,
-        "hideInMenu": false,
-        "locked": false,
-        "readtime": 1
-      }
-    },
-    {
-      "id": "item-kuis-confeti",
-      "indent": 0,
-      "location": "pages/item-kuis-confeti/index.html",
-      "slug": "kuis-confeti",
-      "order": 5,
-      "parent": null,
-      "title": "Kuis Confeti Demo",
-      "description": "Kuis Confeti Demo\n\n",
-      "metadata": {
-        "created": 1762218395,
-        "updated": 1762219978,
-        "published": true,
-        "hideInMenu": false,
-        "locked": false,
-        "readtime": 1,
-        "videos": {},
-        "images": {}
+        "created": 1762220569,
+        "updated": 1762220569,
+        "images": [],
+        "videos": []
       }
     }
   ]
