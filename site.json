@@ -15,7 +15,7 @@
         "canonical": true
       },
       "created": 1762212603,
-      "updated": 1762326758,
+      "updated": 1762326953,
       "git": {
         "vendor": "github",
         "branch": "gh-pages"
@@ -177,7 +177,7 @@
       "description": "Ringkasan fitur kuis",
       "metadata": {
         "created": 1762221117,
-        "updated": 1762326758,
+        "updated": 1762326953,
         "published": true,
         "hideInMenu": false,
         "locked": false,
