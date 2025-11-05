@@ -8,3 +8,4 @@
 // creating your own theme based on it
  import "./custom-kuis-theme.js";
  import "./kuis-confeti.js";
+ import "./quiz-sheets-sender.js";

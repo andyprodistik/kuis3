@@ -15,7 +15,7 @@
         "canonical": true
       },
       "created": 1762212603,
-      "updated": 1762335594,
+      "updated": 1762338808,
       "git": {
         "vendor": "github",
         "branch": "gh-pages"
@@ -190,20 +190,37 @@
       "id": "item-ee315496-0d49-475b-b4da-178b92fc2e97",
       "indent": 0,
       "location": "pages/item-ee315496-0d49-475b-b4da-178b92fc2e97/index.html",
-      "slug": "page-4",
-      "order": 4,
+      "slug": "example-quiz",
+      "order": 5,
       "parent": null,
-      "title": "Page",
+      "title": "Page contoh",
       "description": "\n\n\n\n\n\n\n\n\n\n\n\n\n",
       "metadata": {
         "created": 1762334691,
-        "updated": 1762334885,
+        "updated": 1762338808,
         "images": {},
         "videos": {},
         "published": true,
         "hideInMenu": false,
         "locked": false,
         "readtime": 1
+      }
+    },
+    {
+      "slug": "example-quiz",
+      "title": "Contoh Quiz 3 Soal",
+      "metadata": {
+        "quizResult": {
+          "score": 3,
+          "percentage": 100,
+          "finished": true,
+          "total": 3
+        },
+        "lastUser": {
+          "name": "Budi",
+          "phone": "08123456789",
+          "address": "Jl. Mawar No. 1"
+        }
       }
     }
   ]

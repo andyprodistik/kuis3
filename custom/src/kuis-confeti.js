@@ -326,7 +326,8 @@ class ConfettiQuiz extends LitElement {
     }
 
     launchConfetti() {
-        const overlay = document.querySelector('kuis-confeti');
+        // Use the confetti overlay with id="confetti" if present
+        const overlay = document.getElementById('confetti') || document.querySelector('kuis-confeti');
         if (overlay && typeof overlay.fire === 'function') {
             overlay.fire({ duration: 2000, particleCount: 220 });
             return;
@@ -386,7 +387,16 @@ class ConfettiQuiz extends LitElement {
     }
 
     async _loadFromSiteJson() {
+        // Cek apakah fetch site.json diperlukan
+        // Jika tidak ingin fetch, bisa langsung return
+        // return;
+
         try {
+            // Cek apakah sedang di localhost dan file tidak ada, skip fetch
+            if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+                // Jika tidak ada server, skip
+                return;
+            }
             const res = await fetch('../site.json', { credentials: 'same-origin' });
             if (!res.ok) return;
             const site = await res.json();
@@ -403,7 +413,10 @@ class ConfettiQuiz extends LitElement {
                 this.isDisabled = true;
                 this.showIntroForm = false; // bila sudah ada hasil
             }
-        } catch (e) {}
+        } catch (e) {
+            // Optional: log error jika perlu
+            // console.warn('Gagal fetch site.json:', e);
+        }
     }
 
     // FORM AWAL
