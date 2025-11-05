@@ -1,4 +1,3 @@
-
 import { LitElement, html, css } from 'https://cdn.jsdelivr.net/npm/lit@3.1.4/+esm';
 
 class ConfettiQuiz extends LitElement {
@@ -9,6 +8,7 @@ class ConfettiQuiz extends LitElement {
         isChecked: { type: Boolean },
         currentQuestionIndex: { type: Number },
         showSummary: { type: Boolean },
+        showIntroForm: { type: Boolean },
         // JSON string attribute to supply questions dynamically
         questionsAttr: { type: String, attribute: 'questions' },
         // Alias: allow <confetti-quiz kuis='[...]'> as well
@@ -16,8 +16,7 @@ class ConfettiQuiz extends LitElement {
         autoloadResults: { type: Boolean, attribute: 'autoload-results', reflect: true },
         externalSummary: { type: Object },
         externalLoaded: { type: Boolean },
-        // Google Sheets integration
-        webAppUrl: { type: String, attribute: 'web-app-url' },
+        // Identitas user (diisi via form awal)
         userName: { type: String, attribute: 'user-name' },
         userPhone: { type: String, attribute: 'user-phone' },
         userAddress: { type: String, attribute: 'user-address' },
@@ -31,33 +30,30 @@ class ConfettiQuiz extends LitElement {
         this.isChecked = false;
         this.currentQuestionIndex = 0;
         this.showSummary = false;
+        this.showIntroForm = true;
+
         this.questionsAttr = '';
         this.kuisAttr = '';
         this.autoloadResults = true;
         this.questions = [];
         this.externalSummary = null;
         this.externalLoaded = false;
-        
-        // Google Sheets integration
-        this.webAppUrl = '';
+
         this.userName = '';
         this.userPhone = '';
         this.userAddress = '';
-        
-        // Array pertanyaan default (fallback)
+
+        // Fallback pertanyaan
         this.defaultQuestions = [
             { question: "Siapakah presiden pertama Indonesia?", answer: "soekarno" },
-
         ];
-        
-        // Menyimpan jawaban user untuk setiap soal
+
         this.userAnswers = [];
         this.correctAnswers = [];
     }
 
     connectedCallback() {
         super.connectedCallback();
-        // Parse questions directly from attributes for initial render
         const raw = this.getAttribute('questions') || this.getAttribute('kuis') || '';
         const parsed = this._parseQuestions(raw);
         if (parsed && parsed.length) {
@@ -66,14 +62,7 @@ class ConfettiQuiz extends LitElement {
         if (!this.questions || !this.questions.length) {
             this.questions = this.defaultQuestions.slice();
         }
-        this.currentQuestionIndex = 0;
-        this.showSummary = false;
-        this.message = '';
-        this.isCorrect = false;
-        this.isDisabled = false;
-        this.isChecked = false;
-        this.userAnswers = [];
-        this.correctAnswers = [];
+        this._resetQuizState();
     }
 
     async firstUpdated() {
@@ -84,15 +73,11 @@ class ConfettiQuiz extends LitElement {
                 this.userAnswers = saved.userAnswers;
                 this.correctAnswers = saved.correctAnswers;
                 this.currentQuestionIndex = Math.min(saved.currentQuestionIndex || 0, Math.max(0, this.questions.length - 1));
-                // Determine finished state
                 const finished = Array.isArray(this.userAnswers) && this.userAnswers.length >= this.questions.length && this.correctAnswers.length >= this.questions.length;
                 this.showSummary = !!saved.showSummary || finished;
-                if (this.showSummary) {
-                    this.isDisabled = true;
-                }
+                if (this.showSummary) this.isDisabled = true;
             }
         }
-        // attempt to load prior result from site.json
         await this._loadFromSiteJson();
     }
 
@@ -112,14 +97,7 @@ class ConfettiQuiz extends LitElement {
         if (!this.questions || !this.questions.length) {
             this.questions = this.defaultQuestions.slice();
         }
-        // reset state whenever questions are set the first time
-        this.currentQuestionIndex = 0;
-        this.showSummary = false;
-        this.message = '';
-        this.isCorrect = false;
-        this.isDisabled = false;
-        this.userAnswers = [];
-        this.correctAnswers = [];
+        this._resetQuizState();
     }
 
     _parseQuestions(str) {
@@ -134,19 +112,12 @@ class ConfettiQuiz extends LitElement {
                     }))
                     .filter(x => x.question && x.answer);
             }
-        } catch (e) {
-            // ignore parse errors, fallback to defaults
-        }
+        } catch (e) {}
         return null;
     }
-    
-    get currentQuestion() {
-        return this.questions[this.currentQuestionIndex];
-    }
-    
-    get totalQuestions() {
-        return this.questions.length;
-    }
+
+    get currentQuestion() { return this.questions[this.currentQuestionIndex]; }
+    get totalQuestions() { return this.questions.length; }
 
     static styles = css`
         :host {
@@ -314,16 +285,52 @@ class ConfettiQuiz extends LitElement {
             font-weight: 600;
             margin-bottom: 1rem;
         }
+
+        /* Intro form */
+        .intro {
+            display: grid;
+            gap: 0.75rem;
+        }
+        .intro input, .intro textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #d1d5db;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            color: #1f2937;
+            box-sizing: border-box;
+        }
+        .intro button {
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: none;
+            background-color: #2563eb;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .intro button:hover {
+            background-color: #1d4ed8;
+        }
     `;
 
+    _resetQuizState() {
+        this.currentQuestionIndex = 0;
+        this.showSummary = false;
+        this.message = '';
+        this.isCorrect = false;
+        this.isDisabled = false;
+        this.isChecked = false;
+        this.userAnswers = [];
+        this.correctAnswers = [];
+    }
+
     launchConfetti() {
-        // Gunakan overlay DDD jika tersedia
         const overlay = document.querySelector('kuis-confeti');
         if (overlay && typeof overlay.fire === 'function') {
             overlay.fire({ duration: 2000, particleCount: 220 });
             return;
         }
-        // Fallback ke window.confetti jika ada
         if (window.confetti) {
             window.confetti({
                 particleCount: 200,
@@ -339,7 +346,6 @@ class ConfettiQuiz extends LitElement {
     _storageKey() {
         try { return `confetti-quiz:${location.pathname}`; } catch (e) { return 'confetti-quiz'; }
     }
-
     _saveResults() {
         try {
             const payload = {
@@ -351,11 +357,13 @@ class ConfettiQuiz extends LitElement {
                 score: this.getScore(),
                 percentage: this.getPercentage(),
                 savedAt: Date.now(),
+                userName: this.userName,
+                userPhone: this.userPhone,
+                userAddress: this.userAddress,
             };
             localStorage.setItem(this._storageKey(), JSON.stringify(payload));
-        } catch (e) { /* ignore */ }
+        } catch (e) {}
     }
-
     _loadResults() {
         try {
             const raw = localStorage.getItem(this._storageKey());
@@ -363,9 +371,8 @@ class ConfettiQuiz extends LitElement {
             return JSON.parse(raw);
         } catch (e) { return null; }
     }
-
     clearResults() {
-        try { localStorage.removeItem(this._storageKey()); } catch (e) { /* ignore */ }
+        try { localStorage.removeItem(this._storageKey()); } catch (e) {}
         this.externalSummary = null;
         this.externalLoaded = false;
     }
@@ -394,75 +401,51 @@ class ConfettiQuiz extends LitElement {
                 this.externalLoaded = true;
                 this.showSummary = true;
                 this.isDisabled = true;
+                this.showIntroForm = false; // bila sudah ada hasil
             }
-            // Fallback to local site results map if site.json lacked quiz info
-            if (!this.externalSummary) {
-                const key = 'site.quizResults';
-                try {
-                    const raw = localStorage.getItem(key);
-                    const map = raw ? JSON.parse(raw) : {};
-                    const slug2 = this._currentSlug();
-                    const prior = map[slug2];
-                    if (prior && (prior.finished || typeof prior.score === 'number')) {
-                        const total = Array.isArray(this.questions) && this.questions.length ? this.questions.length : 0;
-                        this.externalSummary = { score: prior.score || 0, percentage: prior.percentage || 0, total };
-                        this.externalLoaded = true;
-                        this.showSummary = true;
-                        this.isDisabled = true;
-                    }
-                } catch (e) { /* ignore */ }
-            }
-        } catch (e) {
-            // ignore fetch errors
-        }
+        } catch (e) {}
     }
 
-    _emitSave(result) {
-        try {
-            const detail = { slug: this._currentSlug(), result };
-            this.dispatchEvent(new CustomEvent('quiz-result', { detail, bubbles: true, composed: true }));
-        } catch(e) {}
+    // FORM AWAL
+    _handleIntroSubmit(e) {
+        e.preventDefault();
+        const form = this.renderRoot.querySelector('#intro-form');
+        if (!form) return;
+        const name = form.querySelector('#user-name')?.value?.trim() || '';
+        const phone = form.querySelector('#user-phone')?.value?.trim() || '';
+        const address = form.querySelector('#user-address')?.value?.trim() || '';
+        this.userName = name;
+        this.userPhone = phone;
+        this.userAddress = address;
+        this.showIntroForm = false;
+        this._resetQuizState();
+        this._saveResults();
     }
 
-    async _sendToGoogleSheets(result) {
-        // Hanya kirim jika kuis selesai dan webAppUrl tersedia
-        if (!result.finished || !this.webAppUrl) return;
-        
+    _emitFinished(result) {
         try {
-            const params = new URLSearchParams({
-                action: 'tambah',
-                iddata: String(Date.now()),
-                namaorng: this.userName || 'Anonymous',
-                nilai: String(result.score || 0),
-                nope: this.userPhone || '',
-                alamatorng: this.userAddress || '',
-                keterangan: `Kuis: ${this._currentSlug()} - ${result.percentage}% (${result.score}/${this.totalQuestions})`
-            });
-            
-            await fetch(this.webAppUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: params,
-                mode: 'no-cors'
-            });
-            
-            console.log('✅ Hasil kuis terkirim ke Google Sheets');
-        } catch (err) {
-            console.error('❌ Gagal mengirim ke Google Sheets:', err);
-        }
+            const detail = {
+                slug: this._currentSlug(),
+                result,
+                user: {
+                    name: this.userName,
+                    phone: this.userPhone,
+                    address: this.userAddress,
+                }
+            };
+            this.dispatchEvent(new CustomEvent('quiz-finished', { detail, bubbles: true, composed: true }));
+        } catch (e) {}
     }
 
     checkAnswer() {
         const inputElement = this.shadowRoot.getElementById('answer-input');
         const userAnswer = inputElement.value.trim().toLowerCase();
         const correctAnswer = this.currentQuestion.answer.toLowerCase();
-        
-        this.message = ''; 
-        
-        // Simpan jawaban user
+
+        this.message = '';
         this.userAnswers[this.currentQuestionIndex] = userAnswer;
         this.isChecked = true;
-        
+
         if (userAnswer === correctAnswer) {
             this.isCorrect = true;
             this.correctAnswers[this.currentQuestionIndex] = true;
@@ -476,9 +459,9 @@ class ConfettiQuiz extends LitElement {
         }
         this._saveResults();
         const result = { score: this.getScore(), percentage: this.getPercentage(), finished: false };
-        this._emitSave(result);
+        this.dispatchEvent(new CustomEvent('quiz-result', { detail: { slug: this._currentSlug(), result }, bubbles: true, composed: true }));
     }
-    
+
     nextQuestion() {
         if (this.currentQuestionIndex < this.totalQuestions - 1) {
             this.currentQuestionIndex++;
@@ -486,22 +469,16 @@ class ConfettiQuiz extends LitElement {
             this.isCorrect = false;
             this.isDisabled = false;
             this.isChecked = this.userAnswers[this.currentQuestionIndex] !== undefined;
-            // Reset input
             const inputElement = this.shadowRoot.getElementById('answer-input');
-            if (inputElement) {
-                inputElement.value = this.userAnswers[this.currentQuestionIndex] || '';
-            }
+            if (inputElement) inputElement.value = this.userAnswers[this.currentQuestionIndex] || '';
         } else {
-            // Menampilkan summary
             this.showSummary = true;
             this._saveResults();
-            const result = { score: this.getScore(), percentage: this.getPercentage(), finished: true };
-            this._emitSave(result);
-            // Kirim ke Google Sheets saat kuis selesai
-            this._sendToGoogleSheets(result);
+            const result = { score: this.getScore(), percentage: this.getPercentage(), finished: true, total: this.totalQuestions };
+            this._emitFinished(result);
         }
     }
-    
+
     previousQuestion() {
         if (this.currentQuestionIndex > 0) {
             this.currentQuestionIndex--;
@@ -509,60 +486,64 @@ class ConfettiQuiz extends LitElement {
             this.isCorrect = this.correctAnswers[this.currentQuestionIndex] || false;
             this.isDisabled = !!this.correctAnswers[this.currentQuestionIndex];
             this.isChecked = this.userAnswers[this.currentQuestionIndex] !== undefined;
-            // Set input value
             const inputElement = this.shadowRoot.getElementById('answer-input');
-            if (inputElement) {
-                inputElement.value = this.userAnswers[this.currentQuestionIndex] || '';
-            }
-            // Tampilkan pesan jika sudah dijawab
+            if (inputElement) inputElement.value = this.userAnswers[this.currentQuestionIndex] || '';
             if (this.userAnswers[this.currentQuestionIndex]) {
-                if (this.isCorrect) {
-                    this.message = '✅ Jawaban Anda benar!';
-                } else {
-                    this.message = `❌ Jawaban yang benar: "${this.questions[this.currentQuestionIndex].answer}"`;
-                }
+                if (this.isCorrect) this.message = '✅ Jawaban Anda benar!';
+                else this.message = `❌ Jawaban yang benar: "${this.questions[this.currentQuestionIndex].answer}"`;
             }
         }
-    }
-    
-    restartQuiz() {
-        this.clearResults();
-        this.currentQuestionIndex = 0;
-        this.showSummary = false;
-        this.message = '';
-        this.isCorrect = false;
-        this.isDisabled = false;
-        this.userAnswers = [];
-        this.correctAnswers = [];
-        const inputElement = this.shadowRoot.getElementById('answer-input');
-        if (inputElement) {
-            inputElement.value = '';
-        }
-    }
-    
-    getScore() {
-        return this.correctAnswers.filter(c => c === true).length;
-    }
-    
-    getPercentage() {
-        return Math.round((this.getScore() / this.totalQuestions) * 100);
     }
 
-    // Menggunakan keypress untuk deteksi tombol Enter
+    restartQuiz() {
+        this.clearResults();
+        this.showIntroForm = true;
+        this._resetQuizState();
+    }
+
+    getScore() { return this.correctAnswers.filter(c => c === true).length; }
+    getPercentage() { return Math.round((this.getScore() / this.totalQuestions) * 100); }
+
     handleKeyPress(e) {
         if (e.key === 'Enter' && !this.isDisabled) {
             this.checkAnswer();
         }
     }
 
+    renderIntroForm() {
+        return html`
+            <div class="card">
+                <h1>Mulai Kuis</h1>
+                <form id="intro-form" class="intro" @submit=${this._handleIntroSubmit}>
+                    <div>
+                        <label for="user-name">Nama</label>
+                        <input id="user-name" type="text" placeholder="Nama Anda" required .value=${this.userName || ''}>
+                    </div>
+                    <div>
+                        <label for="user-phone">No. HP</label>
+                        <input id="user-phone" type="tel" placeholder="08xxxxxxxxxx" .value=${this.userPhone || ''}>
+                    </div>
+                    <div>
+                        <label for="user-address">Alamat</label>
+                        <textarea id="user-address" rows="3" placeholder="Alamat Anda (optional)">${this.userAddress || ''}</textarea>
+                    </div>
+                    <button type="submit">Mulai Kuis</button>
+                </form>
+            </div>
+        `;
+    }
+
     render() {
         if (!this.questions || !this.questions.length) {
             return html`<div class="card"><h1>Kuis</h1><p>Tidak ada soal.</p></div>`;
         }
+        if (this.showIntroForm) {
+            return this.renderIntroForm();
+        }
         if (this.showSummary) {
             return this.renderSummary();
         }
-        
+
         const messageClass = this.isCorrect ? 'correct-answer' : 'wrong-answer';
         const progress = ((this.currentQuestionIndex + 1) / this.totalQuestions) * 100;
         const scoreNow = this.getScore();
@@ -576,36 +557,27 @@ class ConfettiQuiz extends LitElement {
                 <div style="text-align:center;color:#6b7280;margin-top:.25rem;margin-bottom:.5rem">
                     Nilai: ${scoreNow} / ${this.totalQuestions} (${percentageNow}%)
                 </div>
-                
-                <!-- Progress Bar -->
+
                 <div class="progress-bar">
                     <div class="progress-fill" style="width: ${progress}%"></div>
                 </div>
-                
+
                 <div id="quiz-area">
-                    <!-- Question Number -->
-                    <div class="question-number">
-                        Soal ${this.currentQuestionIndex + 1} dari ${this.totalQuestions}
-                    </div>
-                    
-                    <!-- SOAL -->
-                    <p>
-                        ${this.currentQuestionIndex + 1}. ${this.currentQuestion.question}
-                    </p>
-                    
-                    <!-- INPUT JAWABAN -->
-                    <input 
-                        type="text" 
-                        id="answer-input" 
+                    <div class="question-number">Soal ${this.currentQuestionIndex + 1} dari ${this.totalQuestions}</div>
+
+                    <p>${this.currentQuestionIndex + 1}. ${this.currentQuestion.question}</p>
+
+                    <input
+                        type="text"
+                        id="answer-input"
                         placeholder="Tulis jawaban Anda di sini..."
                         ?disabled=${this.isDisabled}
                         @keypress=${this.handleKeyPress}
                         .value=${this.userAnswers[this.currentQuestionIndex] || ''}
-                    >
-                    
-                    <!-- TOMBOL CEK -->
-                    <button 
-                        id="check-button" 
+                    />
+
+                    <button
+                        id="check-button"
                         @click=${this.checkAnswer}
                         ?disabled=${this.isDisabled}
                         style="background-color: ${this.isDisabled ? '#9ca3af' : '#2563eb'}; color: white; cursor: ${this.isDisabled ? 'not-allowed' : 'pointer'};"
@@ -613,14 +585,12 @@ class ConfettiQuiz extends LitElement {
                         Cek Jawaban
                     </button>
 
-                    <!-- AREA PESAN -->
                     <div id="message-box" style="margin-top: 1rem; text-align: center; min-height: 40px;">
                         ${this.message ? html`<div class=${messageClass}>${this.message}</div>` : ''}
                     </div>
-                    
-                    <!-- Navigation Buttons -->
+
                     <div class="nav-buttons">
-                        <button 
+                        <button
                             class="nav-button"
                             @click=${this.previousQuestion}
                             ?disabled=${this.currentQuestionIndex === 0}
@@ -628,7 +598,7 @@ class ConfettiQuiz extends LitElement {
                         >
                             ← Sebelumnya
                         </button>
-                        <button 
+                        <button
                             class="nav-button primary"
                             @click=${this.nextQuestion}
                             ?disabled=${!this.isChecked}
@@ -642,54 +612,32 @@ class ConfettiQuiz extends LitElement {
             </div>
         `;
     }
-    
+
     renderSummary() {
         const ext = this.externalSummary;
         const score = ext ? ext.score : this.getScore();
         const percentage = ext ? ext.percentage : this.getPercentage();
         const total = ext ? (ext.total || this.totalQuestions) : this.totalQuestions;
         const isPerfect = score === total;
-        
+
         return html`
             <div class="card">
                 <div class="summary">
                     <h1>Hasil Kuis</h1>
-                    
-                    <div class="summary-score">
-                        ${score} / ${total}
-                    </div>
-                    
+
+                    <div class="summary-score">${score} / ${total}</div>
+
                     <div style="font-size: 1.5rem; color: #6b7280; margin-bottom: 2rem;">
                         ${percentage}% Benar
                     </div>
-                    
+
                     ${isPerfect ? html`
                         <div style="color: #10b981; font-size: 1.25rem; margin-bottom: 1rem;">
                             🎉 Sempurna! Semua jawaban benar!
                         </div>
                     ` : ''}
-                    
-                    <!-- Detail Jawaban -->
-                    <div style="margin-top: 2rem; text-align: left;">
-                        <h2>Detail Jawaban:</h2>
-                        ${(!ext ? this.questions : []).map((q, index) => {
-                            const userAnswer = this.userAnswers[index] || '(tidak dijawab)';
-                            const isCorrect = this.correctAnswers[index];
-                            return html`
-                                <div class="summary-item ${isCorrect ? 'correct' : 'incorrect'}">
-                                    <div style="font-weight: 600; margin-bottom: 0.25rem; color: ${isCorrect ? '#065f46' : '#991b1b'};">
-                                        Soal ${index + 1}: ${q.question}
-                                    </div>
-                                    <div style="font-size: 0.875rem; color: ${isCorrect ? '#065f46' : '#991b1b'};">
-                                        <strong>Jawaban Anda:</strong> ${userAnswer}<br>
-                                        <strong>Jawaban Benar:</strong> ${q.answer}
-                                    </div>
-                                </div>
-                            `;
-                        })}
-                    </div>
-                    
-                    <button 
+
+                    <button
                         class="nav-button primary"
                         @click=${this.restartQuiz}
                         style="margin-top: 2rem; width: 100%; padding: 1rem; font-size: 1.125rem; color: white;"
@@ -704,85 +652,80 @@ class ConfettiQuiz extends LitElement {
 
 customElements.define('confetti-quiz', ConfettiQuiz);
 
-// DDD-integrated confetti overlay component
-class KuisConfeti extends LitElement {
-  static properties = {
-    running: { type: Boolean, reflect: true },
-    duration: { type: Number },
-    particleCount: { type: Number },
-  };
-  static styles = css`
-    :host { position: fixed; inset: 0; pointer-events: none; display: block; z-index: 9999; }
-    canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-  `;
-  constructor() {
-    super();
-    this.running = false;
-    this.duration = 1500;
-    this.particleCount = 180;
-    this._particles = [];
-    this._endAt = 0;
-  }
-  render() { return html`<canvas part="canvas" aria-hidden="true"></canvas>`; }
-  firstUpdated() {
-    this._canvas = this.renderRoot.querySelector('canvas');
-    this._ctx = this._canvas.getContext('2d');
-    const resize = () => {
-      const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
-      this._canvas.width = Math.floor(this.clientWidth * dpr);
-      this._canvas.height = Math.floor(this.clientHeight * dpr);
-      this._ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-    this._resize = resize;
-    resize();
-    window.addEventListener('resize', resize, { passive: true });
-  }
-  disconnectedCallback() {
-    super.disconnectedCallback();
-    window.removeEventListener('resize', this._resize);
-    cancelAnimationFrame(this._raf);
-  }
-  fire(opts = {}) {
-    const cs = getComputedStyle(document.documentElement);
-    const colors = [
-      cs.getPropertyValue('--ddd-theme-default-skyBlue')?.trim() || '#3da9fc',
-      cs.getPropertyValue('--ddd-theme-default-accent')?.trim() || '#ef4565',
-      cs.getPropertyValue('--ddd-theme-default-link')?.trim() || '#6246ea',
-      cs.getPropertyValue('--ddd-theme-default-lime')?.trim() || '#84cc16',
-      cs.getPropertyValue('--ddd-theme-default-warning')?.trim() || '#f59e0b',
-    ];
-    const width = this.clientWidth || window.innerWidth;
-    const height = this.clientHeight || window.innerHeight;
-    const count = opts.particleCount ?? this.particleCount;
-    const spread = Math.PI / 2; // 90deg
-    const angle = -Math.PI / 2; // up
-    const speed = 6;
-    this._particles = new Array(count).fill(0).map(() => {
-      const theta = angle + (Math.random() - 0.5) * spread;
-      const vx = Math.cos(theta) * (speed * (0.6 + Math.random() * 0.8));
-      const vy = Math.sin(theta) * (speed * (0.6 + Math.random() * 0.8));
-      return { x: width / 2, y: height * 0.85, vx, vy, g: 0.18 + Math.random() * 0.22, w: 6 + Math.random() * 6, h: 8 + Math.random() * 6, r: Math.random() * Math.PI, vr: (Math.random() - 0.5) * 0.3, color: colors[Math.floor(Math.random() * colors.length)], alpha: 1 };
-    });
-    this._endAt = performance.now() + (opts.duration ?? this.duration);
-    if (!this.running) { this.running = true; this._tick(); }
-  }
-  _tick = () => {
-    this._raf = requestAnimationFrame(this._tick);
-    const now = performance.now();
-    if (now >= this._endAt && this._particles.length === 0) { this.running = false; cancelAnimationFrame(this._raf); return; }
-    const ctx = this._ctx; if (!ctx) return;
-    const w = this._canvas.width; const h = this._canvas.height;
-    ctx.clearRect(0, 0, w, h);
-    const still = [];
-    for (const p of this._particles) {
-      p.vy += p.g; p.x += p.vx; p.y += p.vy; p.r += p.vr; p.alpha -= 0.008;
-      if (p.alpha <= 0 || p.y > h + 20) continue;
-      still.push(p);
-      ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, p.alpha)); ctx.translate(p.x, p.y); ctx.rotate(p.r);
-      ctx.fillStyle = p.color; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h); ctx.restore();
+/* Tetap pertahankan overlay confetti DDD */
+export class KuisConfeti extends LitElement {
+    static properties = { running: { type: Boolean, reflect: true }, duration: { type: Number }, particleCount: { type: Number } };
+    static styles = css`
+        :host { position: fixed; inset: 0; pointer-events: none; display: block; z-index: 9999; }
+        canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    `;
+    constructor() {
+        super();
+        this.running = false;
+        this.duration = 1500;
+        this.particleCount = 180;
+        this._particles = [];
+        this._endAt = 0;
     }
-    this._particles = still;
-  }
+    render() { return html`<canvas part="canvas" aria-hidden="true"></canvas>`; }
+    firstUpdated() {
+        this._canvas = this.renderRoot.querySelector('canvas');
+        this._ctx = this._canvas.getContext('2d');
+        const resize = () => {
+            const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+            this._canvas.width = Math.floor(this.clientWidth * dpr);
+            this._canvas.height = Math.floor(this.clientHeight * dpr);
+            this._ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        };
+        this._resize = resize;
+        resize();
+        window.addEventListener('resize', resize, { passive: true });
+    }
+    disconnectedCallback() {
+        super.disconnectedCallback();
+        window.removeEventListener('resize', this._resize);
+        cancelAnimationFrame(this._raf);
+    }
+    fire(opts = {}) {
+        const cs = getComputedStyle(document.documentElement);
+        const colors = [
+            cs.getPropertyValue('--ddd-theme-default-skyBlue')?.trim() || '#3da9fc',
+            cs.getPropertyValue('--ddd-theme-default-accent')?.trim() || '#ef4565',
+            cs.getPropertyValue('--ddd-theme-default-link')?.trim() || '#6246ea',
+            cs.getPropertyValue('--ddd-theme-default-lime')?.trim() || '#84cc16',
+            cs.getPropertyValue('--ddd-theme-default-warning')?.trim() || '#f59e0b',
+        ];
+        const width = this.clientWidth || window.innerWidth;
+        const height = this.clientHeight || window.innerHeight;
+        const count = opts.particleCount ?? this.particleCount;
+        const spread = Math.PI / 2; // 90deg
+        const angle = -Math.PI / 2; // up
+        const speed = 6;
+        this._particles = new Array(count).fill(0).map(() => {
+            const theta = angle + (Math.random() - 0.5) * spread;
+            const vx = Math.cos(theta) * (speed * (0.6 + Math.random() * 0.8));
+            const vy = Math.sin(theta) * (speed * (0.6 + Math.random() * 0.8));
+            return { x: width / 2, y: height * 0.85, vx, vy, g: 0.18 + Math.random() * 0.22, w: 6 + Math.random() * 6, h: 8 + Math.random() * 6, r: Math.random() * Math.PI, vr: (Math.random() - 0.5) * 0.3, color: colors[Math.floor(Math.random() * colors.length)], alpha: 1 };
+        });
+        this._endAt = performance.now() + (opts.duration ?? this.duration);
+        if (!this.running) { this.running = true; this._tick(); }
+    }
+    _tick = () => {
+        this._raf = requestAnimationFrame(this._tick);
+        const now = performance.now();
+        if (now >= this._endAt && this._particles.length === 0) { this.running = false; cancelAnimationFrame(this._raf); return; }
+        const ctx = this._ctx; if (!ctx) return;
+        const w = this._canvas.width; const h = this._canvas.height;
+        ctx.clearRect(0, 0, w, h);
+        const still = [];
+        for (const p of this._particles) {
+            p.vy += p.g; p.x += p.vx; p.y += p.vy; p.r += p.vr; p.alpha -= 0.008;
+            if (p.alpha <= 0 || p.y > h + 20) continue;
+            still.push(p);
+            ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, p.alpha)); ctx.translate(p.x, p.y); ctx.rotate(p.r);
+            ctx.fillStyle = p.color; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h); ctx.restore();
+        }
+        this._particles = still;
+    }
 }
 customElements.define('kuis-confeti', KuisConfeti);
-export { KuisConfeti };
