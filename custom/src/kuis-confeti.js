@@ -16,6 +16,11 @@ class ConfettiQuiz extends LitElement {
         autoloadResults: { type: Boolean, attribute: 'autoload-results', reflect: true },
         externalSummary: { type: Object },
         externalLoaded: { type: Boolean },
+        // Google Sheets integration
+        webAppUrl: { type: String, attribute: 'web-app-url' },
+        userName: { type: String, attribute: 'user-name' },
+        userPhone: { type: String, attribute: 'user-phone' },
+        userAddress: { type: String, attribute: 'user-address' },
     };
 
     constructor() {
@@ -32,6 +37,12 @@ class ConfettiQuiz extends LitElement {
         this.questions = [];
         this.externalSummary = null;
         this.externalLoaded = false;
+        
+        // Google Sheets integration
+        this.webAppUrl = '';
+        this.userName = '';
+        this.userPhone = '';
+        this.userAddress = '';
         
         // Array pertanyaan default (fallback)
         this.defaultQuestions = [
@@ -413,6 +424,34 @@ class ConfettiQuiz extends LitElement {
         } catch(e) {}
     }
 
+    async _sendToGoogleSheets(result) {
+        // Hanya kirim jika kuis selesai dan webAppUrl tersedia
+        if (!result.finished || !this.webAppUrl) return;
+        
+        try {
+            const params = new URLSearchParams({
+                action: 'tambah',
+                iddata: String(Date.now()),
+                namaorng: this.userName || 'Anonymous',
+                nilai: String(result.score || 0),
+                nope: this.userPhone || '',
+                alamatorng: this.userAddress || '',
+                keterangan: `Kuis: ${this._currentSlug()} - ${result.percentage}% (${result.score}/${this.totalQuestions})`
+            });
+            
+            await fetch(this.webAppUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params,
+                mode: 'no-cors'
+            });
+            
+            console.log('✅ Hasil kuis terkirim ke Google Sheets');
+        } catch (err) {
+            console.error('❌ Gagal mengirim ke Google Sheets:', err);
+        }
+    }
+
     checkAnswer() {
         const inputElement = this.shadowRoot.getElementById('answer-input');
         const userAnswer = inputElement.value.trim().toLowerCase();
@@ -436,7 +475,8 @@ class ConfettiQuiz extends LitElement {
             this.message = `❌ Salah. Jawaban yang benar adalah: "${this.currentQuestion.answer}"`;
         }
         this._saveResults();
-        this._emitSave({ score: this.getScore(), percentage: this.getPercentage(), finished: false });
+        const result = { score: this.getScore(), percentage: this.getPercentage(), finished: false };
+        this._emitSave(result);
     }
     
     nextQuestion() {
@@ -455,7 +495,10 @@ class ConfettiQuiz extends LitElement {
             // Menampilkan summary
             this.showSummary = true;
             this._saveResults();
-            this._emitSave({ score: this.getScore(), percentage: this.getPercentage(), finished: true });
+            const result = { score: this.getScore(), percentage: this.getPercentage(), finished: true };
+            this._emitSave(result);
+            // Kirim ke Google Sheets saat kuis selesai
+            this._sendToGoogleSheets(result);
         }
     }
     
