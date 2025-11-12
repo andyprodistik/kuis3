@@ -15,7 +15,7 @@
         "canonical": true
       },
       "created": 1762212603,
-      "updated": 1762964241,
+      "updated": 1762964300,
       "git": {
         "vendor": "github",
         "branch": "gh-pages"
@@ -141,7 +141,7 @@
       "description": "\nContoh Kuis (atribut)\n\n\n",
       "metadata": {
         "created": 1762218999,
-        "updated": 1762335594,
+        "updated": 1762964300,
         "published": true,
         "hideInMenu": false,
         "locked": false,
