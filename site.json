@@ -22,9 +22,9 @@
       }
     },
     "theme": {
-      "element": "custom-kuis-theme",
+      "element": "custom-porto-theme",
       "path": "./custom/build/custom.es6.js",
-      "name": "CustomKuisTheme"
+      "name": "CustomPortoTheme"
     },
     "node": {
       "fields": {}

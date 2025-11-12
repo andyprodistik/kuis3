@@ -6,10 +6,10 @@
 // https://github.com/haxtheweb/webcomponents/blob/master/elements/example-haxcms-theme/example-haxcms-theme.js
 // don't import that directory, we'd recommend copy and pasting it in here or
 // creating your own theme based on it
-import "./custom-kuis-theme.js";
-// import "./kuis-confeti.js";
-// import "./quiz-sheets-sender.js";
+// import "./custom-kuis-theme.js";
+import "./kuis-confeti.js";
+import "./quiz-sheets-sender.js";
 // import "./fake-theme.js";
-
-import "./hero-section.js";
+import "./custom-porto-theme.js"
+// import "./hero-section.js";
 import "./expanding-cards.js";
