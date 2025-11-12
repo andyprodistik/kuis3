@@ -23,7 +23,7 @@
     },
     "theme": {
       "element": "custom-porto-theme",
-      "path": "./custom/build/custom.es6.js",
+      "path": "./custom/custom-porto-theme.js",
       "name": "CustomPortoTheme"
     },
     "node": {
