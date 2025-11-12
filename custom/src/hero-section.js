@@ -1,4 +1,4 @@
-import { LitElement, html, css } from 'https://cdn.jsdelivr.net/npm/lit@3.1.4/+esm';
+import { LitElement, html, css } from 'https://unpkg.com/lit@latest?module';
 
 export class HeroSection extends LitElement {
   static styles = css`
@@ -7,7 +7,7 @@ export class HeroSection extends LitElement {
       margin-bottom: 2rem;
     }
     .jumbotron {
-      background: url('img/jumbotron-bg.jpg');
+      background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80');
       background-size: cover;
       height: 540px;
       position: relative;
