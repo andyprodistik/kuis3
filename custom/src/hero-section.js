@@ -2,10 +2,10 @@ import { LitElement, html, css } from 'https://unpkg.com/lit@latest?module';
 
 export class HeroSection extends LitElement {
   static styles = css`
-    /* :host {
+    :host {
       display: block;
       margin-bottom: 2rem;
-    } */
+    }
     .hero {
       background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80');
       background-size: cover;

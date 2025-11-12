@@ -287,9 +287,4 @@ Supported import methods:
 - **HAX Community**: Run `hax party` for involvement opportunities
 - **Discord**: https://bit.ly/hax-discord
 - **Issue Reporting**: Use `haxtheweb/issues` or GitHub interface
-- **Documentation**: Run `man hax` (Linux/macOS) for comprehensive CLI docs
-- **Educational Resources**: Complete documentation at https://haxtheweb.org/
-
----
-
-*This file serves as the authoritative guide for HAX ecosystem development. All contributors should familiarize themselves with these standards to maintain consistency and quality across the platform.*
+- **Documentation**: Run `man hax` (Linux

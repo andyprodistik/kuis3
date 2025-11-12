@@ -9,5 +9,7 @@
 import "./custom-kuis-theme.js";
 import "./kuis-confeti.js";
 import "./quiz-sheets-sender.js";
-import "./hero-section.js";
+// import "./fake-theme.js";
 
+import "./hero-section.js";
+import "./expanding-cards.js";
