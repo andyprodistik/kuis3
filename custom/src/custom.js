@@ -7,8 +7,8 @@
 // don't import that directory, we'd recommend copy and pasting it in here or
 // creating your own theme based on it
 import "./custom-kuis-theme.js";
-import "./kuis-confeti.js";
-import "./quiz-sheets-sender.js";
+// import "./kuis-confeti.js";
+// import "./quiz-sheets-sender.js";
 // import "./fake-theme.js";
 
 import "./hero-section.js";
