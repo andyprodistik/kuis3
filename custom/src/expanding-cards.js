@@ -1,6 +1,54 @@
-import { LitElement, html, css } from 'https://unpkg.com/lit@latest?module';
+import { HAXCMSLitElementTheme, html, css } from "@haxtheweb/haxcms-elements/lib/core/HAXCMSLitElementTheme.js";
 
-export class ExpandingCards extends LitElement {
+class ExpandingCards extends HAXCMSLitElementTheme {
+  static get haxProperties() {
+    return {
+      canScale: true,
+      canPosition: true,
+      canEditSource: false,
+      gizmo: {
+        title: "Expanding Cards",
+        description: "An expanding card gallery component",
+        icon: "image:view-carousel",
+        color: "blue",
+        groups: ["Content", "Media"],
+        handles: [],
+        meta: { 
+          author: "Your Name", 
+          owner: "Your Organization" 
+        },
+      },
+      settings: {
+        quick: [],
+        configure: [
+          {
+            property: "panels",
+            title: "Panels",
+            description: "The panels to display in the gallery",
+            inputMethod: "array",
+            properties: [
+              {
+                property: "imageUrl",
+                title: "Image URL",
+                description: "The URL of the image for the panel",
+                inputMethod: "textfield",
+                required: true,
+              },
+              {
+                property: "title",
+                title: "Title",
+                description: "The title to display on the panel",
+                inputMethod: "textfield",
+                required: true,
+              },
+            ],
+          },
+        ],
+        advanced: [],
+      },
+    };
+  }
+
   static styles = css`
     @import url('https://fonts.googleapis.com/css?family=Muli&display=swap');
 
@@ -63,6 +111,10 @@ export class ExpandingCards extends LitElement {
     activePanel: { type: Number }
   };
 
+  static get tag() {
+    return "expanding-cards";
+  }
+
   constructor() {
     super();
     this.panels = [
@@ -111,4 +163,5 @@ export class ExpandingCards extends LitElement {
   }
 }
 
-customElements.define('expanding-cards', ExpandingCards);
+customElements.define(ExpandingCards.tag, ExpandingCards);
+export { ExpandingCards };

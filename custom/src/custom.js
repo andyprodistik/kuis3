@@ -11,5 +11,5 @@ import "./kuis-confeti.js";
 import "./quiz-sheets-sender.js";
 // import "./fake-theme.js";
 import "./custom-porto-theme.js"
-// import "./hero-section.js";
+import "./hero-section.js";
 import "./expanding-cards.js";
