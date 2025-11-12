@@ -12,4 +12,4 @@ import "./quiz-sheets-sender.js";
 // import "./fake-theme.js";
 
 // import "./hero-section.js";
-import "./expanding-cards.js";
+// import "./expanding-cards.js";
